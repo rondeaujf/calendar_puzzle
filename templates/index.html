@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calendar Puzzle Solver</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-amber-50 min-h-screen flex flex-col items-center py-10 font-sans">
+
+    <div class="bg-white p-8 rounded-xl shadow-lg w-full max-w-md">
+        <h1 class="text-3xl font-bold text-center text-amber-900 mb-6">Calendar Puzzle</h1>
+        
+        <form method="POST" class="flex gap-4 justify-center mb-8">
+            <select name="month" class="p-2 border rounded-md text-lg focus:ring focus:ring-amber-200">
+                {% for m in months %}
+                    <option value="{{ m }}" {% if m == selected_month %}selected{% endif %}>{{ m }}</option>
+                {% endfor %}
+            </select>
+            <select name="day" class="p-2 border rounded-md text-lg focus:ring focus:ring-amber-200">
+                {% for d in days %}
+                    <option value="{{ d }}" {% if d == selected_day %}selected{% endif %}>{{ d }}</option>
+                {% endfor %}
+            </select>
+            <button type="submit" class="bg-amber-600 text-white px-4 py-2 rounded-md hover:bg-amber-700 transition">
+                Résoudre
+            </button>
+        </form>
+
+        {% if error %}
+            <div class="bg-red-100 text-red-700 p-3 rounded text-center mb-6">{{ error }}</div>
+        {% endif %}
+
+        {% if grid %}
+            <div class="bg-amber-200 p-4 rounded-lg shadow-inner border-4 border-amber-800">
+                <div class="grid grid-cols-7 gap-1">
+                    {% for row in grid %}
+                        {% for cell in row %}
+                            <div class="aspect-square flex items-center justify-center text-sm font-semibold rounded-sm {{ cell.color }} 
+                                {% if cell.text == '' %} opacity-0 {% endif %}">
+                                {{ cell.text }}
+                            </div>
+                        {% endfor %}
+                    {% endfor %}
+                </div>
+            </div>
+            <p class="text-center text-sm text-gray-500 mt-4">Les lettres identiques (A-H) forment une même pièce.</p>
+        {% else %}
+            <div class="text-center text-gray-400 italic py-10 border-2 border-dashed border-gray-200 rounded-lg">
+                Sélectionnez une date pour voir la solution.
+            </div>
+        {% endif %}
+    </div>
+
+</body>
+</html>

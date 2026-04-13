@@ -1,3 +1,8 @@
+import sys
+import random
+
+sys.argv = ['app.py']
+
 from flask import Flask, render_template, request
 from pycsp3 import *
 
@@ -59,6 +64,10 @@ def solve_calendar(mois_cible, jour_cible):
                         T[i].append(bool_tuple)
 
     if any(not t for t in T): return None # Une pièce ne peut pas être placée
+
+    # On mélange aléatoirement l'ordre des placements possibles pour chaque pièce
+    for i in range(len(pieces)):
+        random.shuffle(T[i])
 
     # Modélisation PyCSP3
     B = VarArray(size=[len(pieces), len(active_cells)], dom={0, 1})

@@ -18,7 +18,7 @@ COLORS = {
 }
 
 def solve_calendar(mois_cible, jour_cible):
-    clear() # Réinitialise l'instance PyCSP3 [cite: 5880]
+    clear()  # Réinitialise l'instance PyCSP3 [cite: 5880]
 
     # Disposition du plateau Genius Crafts
     month_map = {
@@ -31,19 +31,19 @@ def solve_calendar(mois_cible, jour_cible):
     target_cells = {month_map[mois_cible], day_map[jour_cible]}
     active_cells = [cell for cell in board_coords if cell not in target_cells]
     
-    # Définition des pièces
+    # Définition des pièces en respectant vos formes
     pieces = [
-        [(0,0), (0,1), (0,2), (1,0), (1,1), (1,2)], # La grosse pièce (Hexomino 2x3)
-        [(0,0), (0,1), (0,2), (1,0), (1,2)],        # Pièce en U
-        [(0,0), (1,0), (2,0), (3,0), (3,1)],        # Pièce en L (long)
-        [(0,0), (1,0), (2,0), (2,1), (2,2)],        # Pièce en V (coin 3x3)
-        [(0,0), (1,0), (1,1), (1,2), (2,2)],        # Pièce en Z (escalier)
-        [(0,0), (0,1), (0,2), (0,3), (1,1)],        # LA PIÈCE F
-        [(0,0), (0,1), (1,0), (1,1), (1,2)],        # Pièce en P (bloc compact)
-        [(0,0), (0,1), (0,2), (1,2), (1,3)]         # Pièce en Y (ou T allongé)
+        [(0,0), (0,1), (0,2), (1,0), (1,1), (1,2)], # A: La grosse pièce (Hexomino 2x3)
+        [(0,0), (0,1), (0,2), (1,0), (1,2)],        # B: Pièce en U
+        [(0,0), (1,0), (2,0), (3,0), (3,1)],        # C: Pièce en L (long)
+        [(0,0), (1,0), (2,0), (2,1), (2,2)],        # D: Pièce en V (coin 3x3)
+        [(0,0), (0,1), (1,1), (1,2), (2,2)],        # E: Pièce en Z (escalier)
+        [(0,0), (0,1), (0,2), (0,3), (1,1)],        # F: LA PIÈCE F
+        [(0,0), (0,1), (1,0), (1,1), (1,2)],        # G: Pièce en P (bloc compact)
+        [(0,0), (0,1), (0,2), (1,2), (1,3)]         # H: Pièce en Y (ou T allongé)
     ]
 
-def get_orientations(piece):
+    def get_orientations(piece):
         orientations = set()
         for flip in [False, True]:
             p = [(r, c) for r, c in piece]
@@ -55,6 +55,7 @@ def get_orientations(piece):
                 orientations.add(norm_p)
         return list(orientations)
 
+    # Calcul des placements possibles
     T = [[] for _ in range(len(pieces))]
     for i, piece in enumerate(pieces):
         for orient in get_orientations(piece):
@@ -65,7 +66,8 @@ def get_orientations(piece):
                         bool_tuple = tuple(1 if cell in placement else 0 for cell in active_cells)
                         T[i].append(bool_tuple)
 
-    if any(not t for t in T): return None 
+    if any(not t for t in T): 
+        return None 
 
     # Mélange des domaines pour la diversification de la recherche [cite: 4148, 4775]
     for i in range(len(pieces)):

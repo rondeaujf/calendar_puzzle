@@ -37,7 +37,7 @@ def solve_calendar(mois_cible, jour_cible):
         [(0,0), (0,1), (0,2), (1,0), (1,2)],        # B: Pièce en U
         [(0,0), (1,0), (2,0), (3,0), (3,1)],        # C: Pièce en L (long)
         [(0,0), (1,0), (2,0), (2,1), (2,2)],        # D: Pièce en V (coin 3x3)
-        [(0,0), (0,1), (1,1), (1,2), (2,2)],        # E: Pièce en Z (escalier)
+        [(0,0), (1,0), (1,1), (1,2), (2,2)],        # E: Pièce en Z (escalier)
         [(0,0), (0,1), (0,2), (0,3), (1,1)],        # F: LA PIÈCE F
         [(0,0), (0,1), (1,0), (1,1), (1,2)],        # G: Pièce en P (bloc compact)
         [(0,0), (0,1), (0,2), (1,2), (1,3)]         # H: Pièce en Y (ou T allongé)

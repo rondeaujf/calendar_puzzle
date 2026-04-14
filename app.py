@@ -37,10 +37,10 @@ def solve_calendar(mois_cible, jour_cible):
         [(0,0), (0,1), (0,2), (1,0), (1,2)],        # Pièce en U
         [(0,0), (1,0), (2,0), (3,0), (3,1)],        # Pièce en L (long)
         [(0,0), (1,0), (2,0), (2,1), (2,2)],        # Pièce en V (coin 3x3)
-        [(0,0), (0,1), (1,1), (1,2), (2,2)],        # Pièce en Z (escalier)
+        [(0,0), (1,0), (1,1), (1,2), (2,2)],        # Pièce en Z (escalier)
         [(0,0), (0,1), (0,2), (0,3), (1,1)],        # LA PIÈCE F
-        [(0,0), (0,1), (1,0), (1,1), (2,0)],        # Pièce en P (bloc compact)
-        [(0,0), (0,1), (0,2), (0,3), (1,1)]         # Pièce en Y (ou T allongé)
+        [(0,0), (0,1), (1,0), (1,1), (1,2)],        # Pièce en P (bloc compact)
+        [(0,0), (0,1), (0,2), (1,2), (1,3)]         # Pièce en Y (ou T allongé)
     ]
 
     def get_orientations(piece):

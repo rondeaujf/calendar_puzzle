@@ -1,14 +1,15 @@
 import sys
 import random
 
+# Empêche PyCSP3 de lire les arguments de Gunicorn au démarrage
 sys.argv = ['app.py']
 
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, redirect
 from pycsp3 import *
 
 app = Flask(__name__)
 
-# Couleurs pour les 8 pièces (pour l'affichage web)
+# Couleurs pour les 8 pièces
 COLORS = {
     'A': 'bg-red-400', 'B': 'bg-blue-400', 'C': 'bg-green-400', 'D': 'bg-yellow-400',
     'E': 'bg-purple-400', 'F': 'bg-orange-400', 'G': 'bg-pink-400', 'H': 'bg-teal-400',
@@ -17,20 +18,19 @@ COLORS = {
 }
 
 def solve_calendar(mois_cible, jour_cible):
-    clear() # IMPORTANT: Réinitialise le solveur pycsp3 pour chaque nouvelle requête
+    clear() # Réinitialise l'instance PyCSP3 [cite: 5880]
 
+    # Disposition du plateau Genius Crafts
     month_map = {
         "JAN": (0, 0), "FEB": (0, 1), "MAR": (0, 2), "APR": (0, 3), "MAY": (0, 4), "JUN": (0, 5),
         "JUL": (1, 0), "AUG": (1, 1), "SEP": (1, 2), "OCT": (1, 3), "NOV": (1, 4), "DEC": (1, 5)
     }
-
-
     day_map = {str(d): (2 + (d - 1) // 7, (d - 1) % 7) for d in range(1, 32)}
 
     board_coords = list(month_map.values()) + list(day_map.values())
     target_cells = {month_map[mois_cible], day_map[jour_cible]}
     active_cells = [cell for cell in board_coords if cell not in target_cells]
-
+    
     # Définition des pièces
     pieces = [
         [(0,0), (0,1), (0,2), (1,0), (1,1), (1,2)], # La grosse pièce (Hexomino 2x3)
@@ -43,7 +43,7 @@ def solve_calendar(mois_cible, jour_cible):
         [(0,0), (0,1), (0,2), (1,2), (1,3)]         # Pièce en Y (ou T allongé)
     ]
 
-    def get_orientations(piece):
+def get_orientations(piece):
         orientations = set()
         for flip in [False, True]:
             p = [(r, c) for r, c in piece]
@@ -65,29 +65,28 @@ def solve_calendar(mois_cible, jour_cible):
                         bool_tuple = tuple(1 if cell in placement else 0 for cell in active_cells)
                         T[i].append(bool_tuple)
 
-    if any(not t for t in T): return None # Une pièce ne peut pas être placée
+    if any(not t for t in T): return None 
 
-    # On mélange aléatoirement l'ordre des placements possibles pour chaque pièce
+    # Mélange des domaines pour la diversification de la recherche [cite: 4148, 4775]
     for i in range(len(pieces)):
         random.shuffle(T[i])
 
-    # Modélisation PyCSP3
+    # Modélisation CSP [cite: 5374, 5951]
     B = VarArray(size=[len(pieces), len(active_cells)], dom={0, 1})
-    for i in range(len(pieces)): satisfy(B[i] in T[i])
-    for j in range(len(active_cells)): satisfy(Sum(B[i][j] for i in range(len(pieces))) == 1)
+    for i in range(len(pieces)): 
+        satisfy(B[i] in T[i]) # Contrainte d'extension [cite: 5487, 5707]
+    
+    for j in range(len(active_cells)): 
+        satisfy(Sum(B[i][j] for i in range(len(pieces))) == 1) # Contrainte de somme [cite: 5667, 7120]
 
-    # Résolution
-    if solve() is SAT:
-        # Construction de la grille pour le frontend HTML
+    # Résolution avec une graine aléatoire (seed) pour changer de solution à chaque clic
+    if solve(options=f"-seed={random.randint(0, 1000000)}") is SAT:
         grid = [[{'color': COLORS['EMPTY'], 'text': ''} for _ in range(7)] for _ in range(7)]
-        
-        # Ajout des cibles
         r_m, c_m = month_map[mois_cible]
         r_d, c_d = day_map[jour_cible]
         grid[r_m][c_m] = {'color': COLORS['TARGET'], 'text': mois_cible}
         grid[r_d][c_d] = {'color': COLORS['TARGET'], 'text': jour_cible}
 
-        # Ajout des pièces
         chars = "ABCDEFGH"
         for i in range(len(pieces)):
             for j in range(len(active_cells)):
@@ -103,20 +102,22 @@ def index():
     error = None
     selected_month = "JAN"
     selected_day = "1"
-
     if request.method == 'POST':
         selected_month = request.form.get('month')
         selected_day = request.form.get('day')
-        
-        # On évite que PyCSP3 n'écrive trop de logs dans la console du serveur
         grid = solve_calendar(selected_month, selected_day)
         if not grid:
-            error = "Aucune solution trouvée ou le calcul a échoué."
+            error = "Désolé, aucune solution n'a été trouvée pour cette date."
 
     months = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"]
     days = [str(i) for i in range(1, 32)]
-    
-    return render_template('index.html', grid=grid, error=error, months=months, days=days, selected_month=selected_month, selected_day=selected_day)
+    return render_template('index.html', grid=grid, error=error, months=months, days=days, 
+                           selected_month=selected_month, selected_day=selected_day)
+
+@app.route('/reset')
+def reset():
+    return redirect('/')
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    # Configuration pour Render
+    app.run(host='0.0.0.0', port=10000)

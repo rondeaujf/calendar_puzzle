@@ -81,8 +81,13 @@ def solve_calendar(mois_cible, jour_cible):
     for j in range(len(active_cells)): 
         satisfy(Sum(B[i][j] for i in range(len(pieces))) == 1) # Contrainte de somme [cite: 5667, 7120]
 
-    # Résolution avec une graine aléatoire (seed) pour changer de solution à chaque clic
-    if solve(options=f"-seed={random.randint(0, 1000000)}") is SAT:
+    # On définit une graine aléatoire pour Python et le solveur
+    graine = random.randint(0, 1000000)
+
+    # Résolution avec options de diversification :
+    # 1. -seed : définit la graine du solveur Java
+    # 2. -valh=Rand : force le choix aléatoire des valeurs (placements de pièces)
+    if solve(options=f"-seed={graine} -valh=Rand") is SAT:
         grid = [[{'color': COLORS['EMPTY'], 'text': ''} for _ in range(7)] for _ in range(7)]
         r_m, c_m = month_map[mois_cible]
         r_d, c_d = day_map[jour_cible]
